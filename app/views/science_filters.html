@@ -1,0 +1,202 @@
+<div id="fc" class="container">
+
+  <div class="row">
+
+    <div class="col-lg-12">
+      <h1 class="page-header">Digital Filters
+                <small></small>
+            </h1>
+      <ol class="breadcrumb">
+        <li><a href="../index.html">scienceflow</a>
+        </li>
+        <li><a href="#/science">Science</a>
+        </li>
+        <li class="active">Digital Filters</li>
+      </ol>
+    </div>
+
+  </div>
+  <div class="section">
+    <div class="container">
+
+      <div class="row">
+        <div class="col-lg-6 col-md-6">
+          <h3>What is it good for?</h3>
+          <p class="par-text">
+            Digital filters frequency dependent damp or amplify the magnitude of a sigmal. A lowpass damps the higher frequencies, a highpass the lower frequencies. A bandpass and bandstop damp the frequencies in the middle or on the edges. While doing that, filters add a delay to the signal. The propagation from the input to the output takes some time. The introduced delay can be frequency dependent. A frequency dependent delay leads to a distortion of the output signal. Distortion may be desired, unwanted or may not matter at all. In the following <a href="https://github.com/markert/fili.js">fili.js</a> is used for filter calculations and <a href="http://www.flotcharts.org/">flot</a> for graphics. The following will give you an insight into filters and their behavior and show some tricks when dealing with biquad filters. There are various <a href="http://www.dspguide.com/pdfbook.htm">sources</a> on the web to understand the mathematics.
+          </p>
+        </div>
+        <div class="col-lg-4 col-md-4 col-sm-6">
+          <a title="By BlanchardJ (Own work) [Public domain], via Wikimedia Commons" href="http://commons.wikimedia.org/wiki/File%3AFIR_Filter.svg">
+            <img class="img-responsive img-home-portfolio" alt="FIR Filter" src="images/fir.png" />
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="section-colored">
+    <div class="container">
+
+      <div class="row">
+
+        <div class="col-lg-4 col-md-4 col-sm-6">
+          <div ng-controller="IirplotCtrl">
+            <flot-canvas class="pos_all" options="options" f="f" type="polezero"></flot-canvas>
+          </div>
+        </div>
+        <div class="col-lg-6 col-md-6">
+          <h3>Poles and Zeros</h3>
+          <p class="par-text">
+            Digital filters can be designed by transforming analog filters to a digital domain. The analog domain is the s domain and the digital the z domain. An analog filter has a transfer function $H(s)$ while the digital filter has $H(z)$. Zeros (circle) are the number which cause the numerator to become 0, while poles (cross) cause the denominator to become 0. To design a digital filter, poles and zeros of the analog transfer function can be translated to the z domain. Graphically this is a transfer from the complex coordinate (axis are real and imaginary parts of the number) to polar coordinates. A filter is stable if all the poles lay within the left half of the s plane or within the unit circle in the z plane. The filter transfer function can be calculated by the z transform.
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="section">
+    <div class="container">
+
+      <div class="row">
+        <div class="col-lg-6 col-md-6">
+          <h3>IIR Filters</h3>
+          <p class="par-text">
+            The transfer function in the z domain is: $$H(z) =\prod_{n=0}^{N-1} {b_n z^{-n} \over a_n z^{-n}} = \prod_{n=0}^{N-1} {1- q_n z^{-n} \over 1- p_n z^{-n}} $$ q, p are zeros and poles and b, a are the filter coefficients. In the following, 2nd-order filters will be used. I.e. the filter has two poles and two zeros.
+          </p>
+          <p class="par-text">
+            2nd-order filters can be represented by biquad filters. Those filters can be cascaded to achieve higher filter orders and maintain stability and have the transfer function: $$H(z) = k{b_0 + b_1 z^{-1} + b_2 z^{-2} \over 1 + a_1 z^{-1} + a_2 z^{-1}} $$ Note that the whole term is divided by constant $a_0$. Calculating the magnitude and phase for a specific frequency can be done by complex evaluating the term $H(z)$ by substituting $$z = A*e^{j\phi} = A(\cos{\phi} + j\sin{\phi}) \quad A=1$$ The result is a complex number. $$magnitude = \sqrt{re^2 + im^2} $$ $$phase = \arctan{im \over re} $$ Note that the phase is wrapped. It must be unwrapped for further evaluation. The group delay of the filter is the slope of the phase. $$groupDelay = {\delta\phi\over\delta\omega} $$
+          </p>
+        </div>
+        <div class="col-lg-4 col-md-4 col-sm-6">
+          <a title="By Fcorthay (Own work) [CC BY-SA 3.0 (http://creativecommons.org/licenses/by-sa/3.0)], via Wikimedia Commons" href="http://commons.wikimedia.org/wiki/File%3ABiquad_direct_form_2_transposed.svg">
+            <img class="img-responsive img-home-portfolio" alt="Biquad direct form 2 transposed" src="images/biquad.png" />
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="section-colored">
+    <div class="container">
+
+      <div class="row">
+        <div class="col-lg-4 col-md-4 col-sm-6">
+          <div ng-controller="IirplotCtrl">
+            <flot-canvas class="pos_left" options="options" f="f" type="magnitude"></flot-canvas>
+            <flot-canvas class="pos_right" options="options" f="f" type="polezero"></flot-canvas>
+            <flot-canvas class="pos_left" options="options" f="f" type="groupdelay"></flot-canvas>
+            <flot-canvas class="pos_right" options="options" f="f" type="impulseresponse"></flot-canvas>
+            <br>Fs: {{ f.fs }} Hz
+            <input type=range min=0 max=100000 value=1 ng-model="f.fs">
+            <br> Fc: {{ f.fc }} Hz
+            <input type=range min=0 max=25000 value=1 ng-model="f.fc">
+          </div>
+        </div>
+        <div class="col-lg-6 col-md-6">
+          <h3>Butterworth Filters</h3>
+          <p class="par-text">
+            Butterworth filters are characterized by a flat magnitude response in the filter passband. The group delay peaks at the cutoff frequency. In the time domain the filter tends to heavily over- and undershoot. A Butterworth lowpass is e.g. derived from: $$H(s) = \frac{1}{s^2 + {s \over Q} + 1} $$ $Q$ is the quality of the filter. When $Q$ is set to $1 \over \sqrt{2}$ the filter has a flat magnitude. Higher values lead to a magnitude peak lower calues to a negative slope magnitude.
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+  <div class="section">
+    <div class="container">
+
+      <div class="row">
+        <div class="col-lg-6 col-md-6">
+          <h3>Bessel Filters</h3>
+          <p class="par-text">
+            Bessel filters are characterized by a flat group delay in the filter passband. The magnitude defines a curve towards cutoff frequency. In the time domain the filter has nearly no over- or undershoot. Bessel IIR filters can be calculated from Bessel Thomson analog filters: $$H(s) = {3 \over s^2 + 3 s + 3} $$ They can also be <a href="https://gist.github.com/endolith/4982787#file-all-values-txt">derived from Butterworth filters</a> by adjusting $Q$ and the cutoff frequency. The trick is to move the peak of the group delay from the passband to the stopband.
+          </p>
+        </div>
+        <div class="col-lg-4 col-md-4 col-sm-6">
+          <div ng-controller="IirplotCtrl">
+            <flot-canvas class="pos_left" options="options" f="f" type="magnitude" characteristic="bessel" behavior="lowpassBT"></flot-canvas>
+            <flot-canvas class="pos_right" options="options" f="f" type="polezero" characteristic="bessel" behavior="lowpassBT"></flot-canvas>
+            <flot-canvas class="pos_left" options="options" f="f" type="groupdelay" characteristic="bessel" behavior="lowpassBT"></flot-canvas>
+            <flot-canvas class="pos_right" options="options" f="f" type="impulseresponse" characteristic="bessel" behavior="lowpassBT"></flot-canvas>
+            <br>Fs: {{ f.fs }} Hz
+            <input type=range min=0 max=100000 value=1 ng-model="f.fs">
+            <br> Fc: {{ f.fc }} Hz
+            <input type=range min=0 max=25000 value=1 ng-model="f.fc">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="section-colored">
+    <div class="container">
+
+      <div class="row">
+        <div class="col-lg-4 col-md-4 col-sm-6">
+          <div ng-controller="IirplotCtrl">
+            <flot-canvas class="pos_left" options="options" f="f" type="magnitude"></flot-canvas>
+            <flot-canvas class="pos_right" options="options" f="f" type="polezero"></flot-canvas>
+            <flot-canvas class="pos_left" options="options" f="f" type="groupdelay"></flot-canvas>
+            <flot-canvas class="pos_right" options="options" f="f" type="impulseresponse"></flot-canvas>
+            <br>Fs: {{ f.fs }} Hz
+            <input type=range min=0 max=100000 value=1 ng-model="f.fs">
+            <br> Fc: {{ f.fc }} Hz
+            <input type=range min=0 max=25000 value=1 ng-model="f.fc">
+            <br> Order {{ f.order }}
+            <input type=range min=1 max=12 value=1 ng-model="f.order">
+            <select ng-model="f.characteristic">
+              <option value="butterworth">Butterworth</option>
+              <option value="bessel">Bessel</option>
+            </select>
+            <select ng-model="f.behavior">
+              <option value="lowpass">Lowpass</option>
+              <option value="highpass">Highpass</option>
+              <option value="allpass">Allpass</option>
+              <option value="bandpass">Bandpass</option>
+              <option value="bandstop">Bandstop</option>
+            </select>
+          </div>
+        </div>
+        <div class="col-lg-6 col-md-6">
+          <h3>Cascaded Filters</h3>
+          <p class="par-text">
+            When building cascades of filters, the magnitudes of the stages multiply and the phase is added. Therefore, the quality factor and the cutoff frequency have to be adjusted for every stage to get the 3dB cutoff at the desired frequency. For Butterworth filters the frequency stays constant and the quality factor changes as follows: $$Q_n = {0.5\over{\sin{\pi\over{N*(n+0.5)}}}} \quad N=order,n=stage $$ Bessel filters cannot be cascaded that easily. Bessel behavior can either be achieved by increasing the cutoff frequency to match the magnitude or by cascading Butterworth filters and shiftig the group delay peak to the right.
+          </p>
+          <p class="par-text">
+            Cascading should be used rather than building higher order filters when dealing with stability issues. This is mostly the case when using single precision floating point units or fixed point hardware arithmetic. A cascade is more tolerant for rounding errors than a deeper filter.
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+  <div class="section">
+    <div class="container">
+
+      <div class="row">
+        <div class="col-lg-6 col-md-6">
+          <h3>FIR Filters</h3>
+          <p class="par-text">
+            FIR filters do not incorporate a negative path. Therefore they will never become unstable and have a linear phase. I.e. the group delay is constant over the whole frequency range. There are different methods of the calculation of FIR coefficients. The example uses a windowed sinc function to retrieve the coefficients. FIR filters introduce a high delay and require more calculations as the respective IIR filter. Due to the delay, they should not be used in control applications but rather for post processing. When designing hardware filters for FPGAs FIR filters require more logic cells but do not become unstable.
+          </p>
+        </div>
+        <div class="col-lg-4 col-md-4 col-sm-6">
+          <div ng-controller="FirplotCtrl">
+            <flot-canvas class="pos_left" options="options" f="f" type="magnitude"></flot-canvas>
+            <flot-canvas class="pos_right" options="options" f="f" type="impulseresponse"></flot-canvas>
+            <br>Fs: {{ f.fs }} Hz
+            <input type=range min=0 max=100000 value=1 ng-model="f.fs">
+            <br> Fc: {{ f.fc }} Hz
+            <input type=range min=0 max=25000 value=1 ng-model="f.fc">
+            <br> Order {{ f.order }}
+            <input type=range min=20 max=200 value=1 ng-model="f.order">
+            <select ng-model="f.behavior">
+              <option value="lowpass">Lowpass</option>
+              <option value="highpass">Highpass</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- /.container -->
