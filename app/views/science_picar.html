@@ -1,0 +1,160 @@
+<div id="gc" class="container">
+
+  <div class="row">
+
+    <div class="col-lg-12">
+      <h1 class="page-header">PiCar
+                <small></small>
+            </h1>
+      <ol class="breadcrumb">
+        <li><a href="../index.html">scienceflow</a>
+        </li>
+        <li><a href="#/science">Science</a>
+        </li>
+        <li class="active">PiCar</li>
+      </ol>
+    </div>
+
+  </div>
+  <div class="section">
+    <div class="container">
+
+      <div class="row">
+        <div class="col-lg-6 col-md-6">
+          <h3>Overview</h3>
+          <p class="par-text">
+            The PiCar is a standard RC-Car that is controlled via a RaspberryPi. I started it as a fun project just to control an RC-Car over the browser. What I learned is that once you start, there is a nearly infinite number of possibilities of things to do. The components are quite cheap. I did not spend more than 150 Euros all in all. Faster and bigger RC-Cars would be cooler but are more expensive and alittle bit dangerous if something goes wrong. So I went with a 30 Euro model. For some screenshots and videos visit my <a href="https://github.com/markert/jetblink/tree/master/media">github page</a>.
+          </p>
+        </div>
+        <div class="col-lg-4 col-md-4 col-sm-6">
+          <a>
+            <img class="img-responsive img-home-portfolio blog-img" src="images/picar.png" />
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="section-colored">
+    <div class="container">
+
+      <div class="row">
+        <div class="col-lg-4 col-md-4 col-sm-6">
+          <a>
+            <img class="img-responsive img-home-portfolio blog-img" src="images/electronics.png" />
+          </a>
+        </div>
+        <div class="col-lg-6 col-md-6">
+          <h3>Electronics</h3>
+          <p class="par-text">
+            The electronics were inspired by this <a href="http://blog.kaazing.com/2013/04/01/remote-controlling-a-car-over-the-web-ingredients-smartphone-websocket-and-raspberry-pi/">blog</a>. Basically, you can buy any car that has two or more engines for drive and steering control. The remote control and internal electronics are not an issue as you exchange them with your own stuff. A RaspberryPi has GPIOs you can control and that can become 1 or 0. An engine is controlled by two GPIOs. If both are 1 or both are 0, the engine stops. For 10 or 01 the engine rotates forward or backward. To drive the engine over RPi GPIOs, you need an H-Bridge. I am using the L298N driver board that I bought from amazon. It has 2x2 inputs for the GPIOs and 2x2 inputs for the motors it drives. In order to protect the RPI's GPIOs, I put 1k serial resistors between the RPi and the L298N. There is another 12V input that shuld be connected to the battery + and a GND input that should be connected to the battery -. The L298N has no protection diodes, so do not exchange + and -. You should also connect a RPi ground pin to the L298N GND to achieve a common ground potential. Do not power the RPi over the 5V output of the L298N. Use an external USB akku with 2A output. I bought one from Anker which works fine.
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="section">
+    <div class="container">
+
+      <div class="row">
+        <div class="col-lg-6 col-md-6">
+          <h3>Network</h3>
+          <p class="par-text">
+            Network cables are not really suitable for RC-cars. They tend to take away the fun when driving. So you need to connect via WLAN to the RPi. There are two ways to do that. You could connect the RPi and the steering device, that can be any WLAN device, to an access point. This setup would rely on the connection quality of both devices an every frame is routed over the access point and transmitted twice.
+            <a href="https://en.wikipedia.org/wiki/Carrier_sense_multiple_access_with_collision_avoidance">CSMA/CA</a> and low throughput due to <a href="https://en.wikipedia.org/wiki/Quadrature_amplitude_modulation">QAM modulation</a> and channel errors will minimize your video stream bandwidth even more. A much more efficient way is to setup the RPi as a WLAN access point and connect the steering device directly. There are lots of tutorials which depend a little bit on the USB WLAN stick, you use. I am using an Edimax EW-7811UN and it took me about 20 minutes to setup the access point. The programs that you need are isc-dhcp-server and hostapd.
+          </p>
+        </div>
+        <div class="col-lg-4 col-md-4 col-sm-6">
+          <a>
+            <img class="img-responsive img-home-portfolio blog-img" src="images/wlan.png" />
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="section-colored">
+    <div class="container">
+
+      <div class="row">
+        <div class="col-lg-4 col-md-4 col-sm-6">
+          <a>
+            <img class="img-responsive img-home-portfolio blog-img" src="images/motorcontrol.png" />
+          </a>
+        </div>
+        <div class="col-lg-6 col-md-6">
+          <h3>Motor Controls</h3>
+          <p class="par-text">
+            Controlling the motors is quite easy. There are two ways to do that. One is controlling the GPIOs via /sys/class/gpio. I am using the <a href="http://wiringpi.com/the-gpio-utility/">GPIO utility</a> to write to the GPIOs. You can do that from the RPi's command line and your car should already drive.
+          </p>
+          <p class="par-text">
+            I am using the <a href="http://jetbus.io/">Jet protocol</a> in node.js to control the car over websockets. The jet protocol is a lightweight IPC mechanism that uses a central daemon to let services and clients interact. A jet state only calls the respective console commands when set.
+            <div class="codebox">
+              <code>
+          states.motors.drive = new jet.State('/motors/drive', 'stop'); <br>
+          states.motors.drive.on('set', function (param) { <br>
+            &#160if (param === 'stop') {<br>
+            &#160&#160  exec('/usr/local/bin/gpio -g write 23 0');<br>
+            &#160&#160  exec('/usr/local/bin/gpio -g write 24 0');<br>
+            &#160} else if (param === 'forward') {<br>
+              &#160&#160exec('/usr/local/bin/gpio -g write 23 1');<br>
+              &#160&#160exec('/usr/local/bin/gpio -g write 24 0');<br>
+            &#160} else if (param === 'backward') {<br>
+              &#160&#160exec('/usr/local/bin/gpio -g write 23 0');<br>
+              &#160&#160exec('/usr/local/bin/gpio -g write 24 1');<br>
+            &#160} else {<br>
+              &#160&#160return false;<br>
+            &#160}<br>
+            &#160setBlinkColor(); // for blink(1) mk2 <br>
+          });<br>
+          peer.add(states.motors.drive);
+              </code>
+            </div>
+          </p>
+          <p class="par-text">
+            There are three more things, I do in this node process. First of all I implemented a <a href="https://en.wikipedia.org/wiki/Pulse-width_modulation">PWM</a> to set the speed of the car. This is achieved by two functions that call each other after a timeout. One enables the motor and the other one disables it. The timeout ratio provides the PWM. Usually PWM has a higher frequency, so some stuttering of the wheels is noticeable. The second thing I do, is checking if a client is connected. If the connection is lost due to WLAN problems or a closed browser, the car shall stop. The behavior is achieved by creating an alive jet state which is polled and set to false every 600ms. A client must set the state to true in between or the car stops. The third thing I do is getting all the CPU load, memory and IP info. I generated jet states for that which can be fetched by every client and are updated every 1000ms.
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+  <div class="section">
+    <div class="container">
+
+      <div class="row">
+        <div class="col-lg-6 col-md-6">
+          <h3>Camera</h3>
+          <p class="par-text">
+            The camera picture is an mjpeg stream. I am using <a href="http://elinux.org/RPi-Cam-Web-Interface">this</a> camera interface. The good thing is that it provides a web based configuration interface. A low resolution and quality leads to a low latency. I configured it at 640x480 for driving with low quality. Every image has a size of aroung 10kB with this settings. For getting the camera image in my own website, I create a jpg as a symbolic link to /dev/shm/mjpeg/cam.jpg. I set this as img of my html code and refresh with a timer.
+          </p>
+        </div>
+        <div class="col-lg-4 col-md-4 col-sm-6">
+          <a>
+            <img class="img-responsive img-home-portfolio blog-img" src="images/camera.png" />
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="section-colored">
+    <div class="container">
+
+      <div class="row">
+        <div class="col-lg-4 col-md-4 col-sm-6">
+          <a>
+            <img class="img-responsive img-home-portfolio blog-img" src="images/blink1.png" />
+          </a>
+        </div>
+        <div class="col-lg-6 col-md-6">
+          <h3>blink(1) mk2 Controls</h3>
+          <p class="par-text">
+            The blink(1) mk2 is used to monitor the internal state of both motors. Luckily, the light has two independent RGB LEDs. The light is controlled via a node.js service that connects to the RPi's jet daemon. Visit my <a href="https://github.com/markert/jetblink">github repository</a> for more details.
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+  <!-- /.container -->
