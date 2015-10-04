@@ -61,6 +61,10 @@ angular
         templateUrl: "views/science_gps.html",
         controller: "MainCtrl"
       })
+      .when("/science_picar", {
+        templateUrl: "views/science_picar.html",
+        controller: "MainCtrl"
+      })
       // else 404
       .otherwise("/404", {
         templateUrl: "views/404.html",
